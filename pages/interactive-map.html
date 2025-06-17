@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخريطة التفاعلية - منتدى المنظمات غير الحكومية الوطنية اليمنية</title>
+    <meta name="description" content="خريطة تفاعلية تتتبع الوجود العملياتي للمنظمات في اليمن">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../css/style.css" rel="stylesheet">
+    
+    <style>
+        .map-container {
+            height: 600px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            flex-direction: column;
+            color: var(--text-light);
+        }
+        
+        .filter-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .org-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .org-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .sector-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+        
+        .governorate-filter {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .governorate-filter:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .governorate-filter.active {
+            background: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="../index.html">
+                    <img src="../images/logo.jpg" alt="YNNGOsF Logo">
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../index.html" data-translate="nav-home">الرئيسية</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-translate="nav-about">من نحن</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="about.html" data-translate="nav-about">من نحن</a></li>
+                                <li><a class="dropdown-item" href="vision.html" data-translate="about-vision">الرؤية</a></li>
+                                <li><a class="dropdown-item" href="mission.html" data-translate="about-mission">الرسالة</a></li>
+                                <li><a class="dropdown-item" href="values.html" data-translate="about-values">القيم</a></li>
+                                <li><a class="dropdown-item" href="goals.html" data-translate="about-goals">الأهداف</a></li>
+                                <li><a class="dropdown-item" href="where-we-work.html" data-translate="about-where-work">أين نعمل</a></li>
+                                <li><a class="dropdown-item" href="structure.html" data-translate="about-structure">هيكل المنتدى</a></li>
+                                <li><a class="dropdown-item" href="strategy.html" data-translate="about-strategy">استراتيجية المنتدى</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-translate="nav-work">عملنا</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="advocacy.html" data-translate="work-advocacy">المناصرة</a></li>
+                                <li><a class="dropdown-item" href="coordination.html" data-translate="work-coordination">التنسيق</a></li>
+                                <li><a class="dropdown-item" href="working-groups.html" data-translate="work-working-groups">مجموعات العمل</a></li>
+                                <li><a class="dropdown-item" href="representation.html" data-translate="work-representation">التمثيل</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-translate="nav-media">الإعلام</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="news.html" data-translate="media-news">الأخبار</a></li>
+                                <li><a class="dropdown-item" href="photos.html" data-translate="media-photos">الصور</a></li>
+                                <li><a class="dropdown-item" href="videos.html" data-translate="media-videos">الفيديوهات</a></li>
+                                <li><a class="dropdown-item" href="success-stories.html" data-translate="media-success-stories">قصص النجاح</a></li>
+                                <li><a class="dropdown-item" href="infographic.html" data-translate="media-infographic">انفوجرافيك</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-translate="nav-announcements">إعلانات</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="jobs.html" data-translate="announce-jobs">الوظائف</a></li>
+                                <li><a class="dropdown-item" href="tenders.html" data-translate="announce-tenders">المناقصات</a></li>
+                                <li><a class="dropdown-item" href="funding.html" data-translate="announce-funding">فرص التمويل</a></li>
+                                <li><a class="dropdown-item" href="training.html" data-translate="announce-training">فرص التدريب</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="interactive-map.html" data-translate="nav-map">الخريطة التفاعلية</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-translate="nav-library">المكتبة</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="reports.html" data-translate="library-reports">التقارير</a></li>
+                                <li><a class="dropdown-item" href="achievements.html" data-translate="library-achievements">الإنجازات</a></li>
+                                <li><a class="dropdown-item" href="policies.html" data-translate="library-policies">السياسات والأدلة</a></li>
+                                <li><a class="dropdown-item" href="training-records.html" data-translate="library-training-records">تسجيلات التدريبات</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-translate="nav-memberships">العضويات</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="join-us.html" data-translate="membership-join">انضم معنا</a></li>
+                                <li><a class="dropdown-item" href="current-members.html" data-translate="membership-current">العضويات الحالية</a></li>
+                                <li><a class="dropdown-item" href="login.html" data-translate="membership-login">تسجيل الدخول</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="contact.html" data-translate="nav-contact">تواصل معنا</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="language-switcher">
+                        <a href="#" class="lang-btn active" onclick="switchLanguage('ar')">العربية</a>
+                        <a href="#" class="lang-btn" onclick="switchLanguage('en')">English</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Page Header -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <i class="fas fa-map-marked-alt fa-4x mb-4 fade-in"></i>
+                    <h1 class="fade-in" data-translate="map-title">خريطتنا التفاعلية</h1>
+                    <p class="lead fade-in" data-translate="map-description">تتتبع خريطتنا التفاعلية الوجود العملياتي في اليمن بهدف زيادة التعاون والتنسيق بين أعضاء المنتدى والمنظمات الأخرى</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map and Filters -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Filters -->
+                <div class="col-lg-3 mb-4">
+                    <div class="filter-card p-4 fade-in">
+                        <h5 class="mb-4"><i class="fas fa-filter me-2"></i>فلترة النتائج</h5>
+                        
+                        <!-- Search -->
+                        <div class="mb-4">
+                            <label class="form-label">البحث</label>
+                            <input type="text" class="form-control" id="searchInput" placeholder="ابحث عن منظمة...">
+                        </div>
+                        
+                        <!-- Governorate Filter -->
+                        <div class="mb-4">
+                            <label class="form-label">المحافظة</label>
+                            <div class="d-flex flex-wrap gap-2" id="governorateFilters">
+                                <span class="badge governorate-filter active" data-gov="all">الكل</span>
+                                <span class="badge governorate-filter" data-gov="صنعاء">صنعاء</span>
+                                <span class="badge governorate-filter" data-gov="عدن">عدن</span>
+                                <span class="badge governorate-filter" data-gov="تعز">تعز</span>
+                                <span class="badge governorate-filter" data-gov="الحديدة">الحديدة</span>
+                                <span class="badge governorate-filter" data-gov="إب">إب</span>
+                                <span class="badge governorate-filter" data-gov="ذمار">ذمار</span>
+                                <span class="badge governorate-filter" data-gov="حضرموت">حضرموت</span>
+                                <span class="badge governorate-filter" data-gov="لحج">لحج</span>
+                                <span class="badge governorate-filter" data-gov="أبين">أبين</span>
+                                <span class="badge governorate-filter" data-gov="شبوة">شبوة</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Sector Filter -->
+                        <div class="mb-4">
+                            <label class="form-label">القطاع</label>
+                            <select class="form-select" id="sectorFilter">
+                                <option value="all">جميع القطاعات</option>
+                                <option value="health">الصحة</option>
+                                <option value="education">التعليم</option>
+                                <option value="water">المياه والصرف الصحي</option>
+                                <option value="food">الأمن الغذائي</option>
+                                <option value="protection">الحماية</option>
+                                <option value="shelter">المأوى</option>
+                                <option value="livelihood">سبل العيش</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Export Button -->
+                        <button class="btn btn-primary w-100" onclick="exportToExcel()">
+                            <i class="fas fa-download me-2"></i>تصدير إلى Excel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Map -->
+                <div class="col-lg-9">
+                    <div class="map-container fade-in">
+                        <div class="map-placeholder">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3941.05819654971!2d45.04502322136069!3d12.817284590341956!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3df5f70f5913167d%3A0x75fdadfacb3560b0!2z2K7ZiNixINmF2YPYs9ix2Iwg2LnYr9mG2Iwg2KfZhNmK2Y7ZhdmO2YY!5e1!3m2!1sar!2s!4v1750171076789!5m2!1sar!2s"
+                                width="1000" height="600" style="border:0;" allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Organizations List -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h3 class="mb-4 fade-in">المنظمات المسجلة</h3>
+                    <div class="row" id="organizationsList">
+                        <!-- Organization cards will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card fade-in">
+                        <div class="card-body">
+                            <i class="fas fa-building fa-3x text-primary mb-3"></i>
+                            <h3 class="text-primary" id="totalOrgs">150</h3>
+                            <p class="mb-0">إجمالي المنظمات</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card fade-in">
+                        <div class="card-body">
+                            <i class="fas fa-map-marker-alt fa-3x text-primary mb-3"></i>
+                            <h3 class="text-primary" id="totalGovs">22</h3>
+                            <p class="mb-0">المحافظات المغطاة</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card fade-in">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                            <h3 class="text-primary" id="totalBeneficiaries">500000</h3>
+                            <p class="mb-0">المستفيدون</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card fade-in">
+                        <div class="card-body">
+                            <i class="fas fa-project-diagram fa-3x text-primary mb-3"></i>
+                            <h3 class="text-primary" id="totalProjects">850</h3>
+                            <p class="mb-0">المشاريع النشطة</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 data-translate="footer-about">حول المنتدى</h5>
+                    <p>منتدى المنظمات غير الحكومية الوطنية اليمنية هو آلية تنسيق وطنية للمنظمات الوطنية غير الحكومية النشطة في اليمن.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 data-translate="footer-quick-links">روابط سريعة</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="about.html" data-translate="nav-about">من نحن</a></li>
+                        <li><a href="advocacy.html" data-translate="nav-work">عملنا</a></li>
+                        <li><a href="news.html" data-translate="nav-media">الإعلام</a></li>
+                        <li><a href="join-us.html" data-translate="membership-join">انضم معنا</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 data-translate="footer-contact">تواصل معنا</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope me-2"></i> info@ynngosf.org</li>
+                        <li><i class="fas fa-phone me-2"></i> +967 1 234567</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i> عدن، اليمن</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>النشرة الإخبارية</h5>
+                    <p>اشترك في نشرتنا الإخبارية للحصول على آخر الأخبار والتحديثات</p>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="البريد الإلكتروني">
+                        <button class="btn btn-primary" type="button">اشتراك</button>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2025 منتدى المنظمات غير الحكومية الوطنية اليمنية. <span data-translate="footer-rights">جميع الحقوق محفوظة</span></p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="#" class="text-light me-3">سياسة الخصوصية</a>
+                    <a href="#" class="text-light">شروط الاستخدام</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../js/main.js"></script>
+    
+    <script>
+        // Sample organizations data
+        const organizations = [
+            {
+                name: "منظمة التنمية المستدامة",
+                type: "منظمة محلية",
+                governorate: "صنعاء",
+                sectors: ["health", "education"],
+                website: "https://example.org",
+                description: "منظمة تعمل في مجال التنمية المستدامة والصحة المجتمعية"
+            },
+            {
+                name: "جمعية الإغاثة الإنسانية",
+                type: "جمعية خيرية",
+                governorate: "عدن",
+                sectors: ["food", "shelter"],
+                website: "https://example.org",
+                description: "جمعية تقدم المساعدات الإنسانية والإغاثية"
+            },
+            {
+                name: "مؤسسة المياه النظيفة",
+                type: "مؤسسة",
+                governorate: "تعز",
+                sectors: ["water"],
+                website: "https://example.org",
+                description: "مؤسسة متخصصة في مشاريع المياه والصرف الصحي"
+            },
+            {
+                name: "منظمة حماية الطفل",
+                type: "منظمة محلية",
+                governorate: "الحديدة",
+                sectors: ["protection", "education"],
+                website: "https://example.org",
+                description: "منظمة تعمل على حماية حقوق الطفل"
+            },
+            {
+                name: "جمعية التمكين الاقتصادي",
+                type: "جمعية",
+                governorate: "إب",
+                sectors: ["livelihood"],
+                website: "https://example.org",
+                description: "جمعية تعمل على تمكين المجتمعات اقتصادياً"
+            },
+            {
+                name: "مؤسسة الصحة المجتمعية",
+                type: "مؤسسة",
+                governorate: "ذمار",
+                sectors: ["health"],
+                website: "https://example.org",
+                description: "مؤسسة تقدم خدمات الصحة المجتمعية"
+            }
+        ];
+
+        let filteredOrganizations = [...organizations];
+
+        // Sector translations
+        const sectorTranslations = {
+            health: "الصحة",
+            education: "التعليم",
+            water: "المياه والصرف الصحي",
+            food: "الأمن الغذائي",
+            protection: "الحماية",
+            shelter: "المأوى",
+            livelihood: "سبل العيش"
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrganizations();
+            setupFilters();
+        });
+
+        function renderOrganizations() {
+            const container = document.getElementById('organizationsList');
+            container.innerHTML = '';
+
+            filteredOrganizations.forEach(org => {
+                const orgCard = document.createElement('div');
+                orgCard.className = 'col-lg-6 col-md-6 mb-4';
+                
+                const sectorsHtml = org.sectors.map(sector => 
+                    `<span class="sector-badge">${sectorTranslations[sector]}</span>`
+                ).join('');
+
+                orgCard.innerHTML = `
+                    <div class="card org-card h-100 fade-in">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">${org.name}</h5>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-map-marker-alt me-1"></i>${org.governorate} | 
+                                <i class="fas fa-building me-1"></i>${org.type}
+                            </p>
+                            <p class="card-text">${org.description}</p>
+                            <div class="mb-3">
+                                ${sectorsHtml}
+                            </div>
+                            <a href="${org.website}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                <i class="fas fa-external-link-alt me-1"></i>زيارة الموقع
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(orgCard);
+            });
+        }
+
+        function setupFilters() {
+            // Search filter
+            document.getElementById('searchInput').addEventListener('input', filterOrganizations);
+            
+            // Governorate filter
+            document.querySelectorAll('.governorate-filter').forEach(filter => {
+                filter.addEventListener('click', function() {
+                    document.querySelectorAll('.governorate-filter').forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    filterOrganizations();
+                });
+            });
+            
+            // Sector filter
+            document.getElementById('sectorFilter').addEventListener('change', filterOrganizations);
+        }
+
+        function filterOrganizations() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedGov = document.querySelector('.governorate-filter.active').dataset.gov;
+            const selectedSector = document.getElementById('sectorFilter').value;
+
+            filteredOrganizations = organizations.filter(org => {
+                const matchesSearch = org.name.toLowerCase().includes(searchTerm) || 
+                                    org.description.toLowerCase().includes(searchTerm);
+                const matchesGov = selectedGov === 'all' || org.governorate === selectedGov;
+                const matchesSector = selectedSector === 'all' || org.sectors.includes(selectedSector);
+
+                return matchesSearch && matchesGov && matchesSector;
+            });
+
+            renderOrganizations();
+        }
+
+        function exportToExcel() {
+            // Create CSV content
+            let csvContent = "اسم المنظمة,النوع,المحافظة,القطاعات,الوصف\n";
+            
+            filteredOrganizations.forEach(org => {
+                const sectors = org.sectors.map(s => sectorTranslations[s]).join('; ');
+                csvContent += `"${org.name}","${org.type}","${org.governorate}","${sectors}","${org.description}"\n`;
+            });
+
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'organizations_data.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
+
